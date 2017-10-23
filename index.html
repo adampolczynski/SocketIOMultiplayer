@@ -55,13 +55,19 @@ $(document).ready(function() {
 		
 			$("#players li").remove();
 			for (key in p) {
-				$("#players").append("<li><a class='players' id="+key+" href='#'>"+p[key].nickname+"</a></li>");
+				$("#players").append("<li><a class='players' id="+key+" href='#'>"+p[key].nickname+"</a>points: "+p[key].points+"</li>");
 			}
 		
 		});
-		Client.socket.on('move', function(data) {
-		   Game.movePlayer(data.id, data.x, data.y);
-		});
+    Client.socket.on('update ui', function(p) {
+
+        $("#players li").remove();
+        for (key in p) {
+            $("#players").append("<li><a class='players' id="+key+" href='#'>"+p[key].nickname+"</a>points: "+p[key].points+"</li>");
+        }
+
+    });
+
 
 });
 		

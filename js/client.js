@@ -11,8 +11,15 @@ Client.movePlayerByKeyboard = function(x,y){
     Client.socket.emit('keypressed', x,y);
 };
 Client.checkIfCollided = function(x,y) {
-    Client.socket.emit('check if collided');
+    Client.socket.emit('check if collided', x, y);
 }
+Client.socket.on('show star', function(x,y) {
+   Game.addStar(x, y);
+});
+Client.socket.on('star catched', function() {
+    Game.resetStar();
+    Client.socket.emit('add points');
+});
 Client.socket.on('newplayer',function(data){
     Game.addNewPlayer(data.id,data.nickname,data.x,data.y);
 });

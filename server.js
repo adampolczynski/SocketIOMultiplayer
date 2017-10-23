@@ -19,16 +19,18 @@ server.listen(process.env.PORT || 3000,function(){
     console.log('Listening on '+server.address().port);
 });
 server.lastPlayderID = 0; // Keep track of the last id assigned to a new player
-
+server.star = {x:randomInt(100,400), y: randomInt(100,400)}
 io.on('connection',function(socket){
 	console.log('connection has been made');
+    io.emit('update ui', getAllPlayers());
 
     socket.on('newplayer',function(n){
         socket.player = {
             nickname: makeid(),
             id: server.lastPlayderID++,
             x: randomInt(100,400),
-            y: randomInt(100,400)
+            y: randomInt(100,400),
+            points: 0,
         };
         socket.id = server.lastPlayderID;
         console.log("Player joined: "+socket.player.nickname);
@@ -42,16 +44,24 @@ io.on('connection',function(socket){
             io.emit('move', socket.player);
         });
         socket.on('keypressed', function(x, y) {
-           console.log('moving by keyboard');
            socket.player.x += x;
            socket.player.y += y;
            io.emit('move', socket.player);
         });
         socket.on('check if collided', function(x, y) {
-            console.log(x);
-           if (socket.player.x == x) {
-               console.log('colllllliddeeeee!!!');
-           }
+            console.log('star.x:'+x+" player.x:"+socket.player.x);
+            if ((x >= socket.player.x-20 && x <= socket.player.x+20) && (y >= socket.player.y-20 && y <= socket.player.y+20)) {
+                console.log('colllllliddeeeee!!!');
+                socket.emit('star catched');
+            }
+
+        });
+
+        io.emit('show star', server.star.x, server.star.y);
+
+        socket.on('add points', function() {
+            socket.player.points += 20;
+            io.emit('update ui', getAllPlayers());
         });
         socket.on('disconnect', function() {
             io.emit('remove', socket.player.id);
