@@ -19,11 +19,10 @@ server.listen(process.env.PORT || 3000,function(){
     console.log('Listening on '+server.address().port);
 });
 server.lastPlayderID = 0; // Keep track of the last id assigned to a new player
-server.star = {x:randomInt(100,400), y: randomInt(100,400)}
+server.star = {x:randomInt(100,400), y: randomInt(100,400), vx:randomInt(20,80),vy:randomInt(20,80)}
 io.on('connection',function(socket){
 	console.log('connection has been made');
     io.emit('update ui', getAllPlayers());
-
     socket.on('newplayer',function(n){
         socket.player = {
             nickname: makeid(),
@@ -32,11 +31,16 @@ io.on('connection',function(socket){
             y: randomInt(100,400),
             points: 0,
         };
+
+        if (server.lastPlayderID == 2) { // waiting until two players in room available
+            //io.emit('show star', server.star.x, server.star.y, server.star.vx, server.star.vy);
+            io.emit('show start',server.star.x, server.star.y, server.star.vx, server.star.vy);
+        }
+        //io.emit('show star', server.star.x, server.star.y, server.star.vx, server.star.vy);
+        io.emit('allplayers',getAllPlayers());
         socket.id = server.lastPlayderID;
         console.log("Player joined: "+socket.player.nickname);
-        io.emit('allplayers',getAllPlayers()); // to all players
         socket.emit('removeButton');
-
         socket.on('click',function(data){
             console.log('click to '+data.x+', '+data.y);
             socket.player.x = data.x;
@@ -48,26 +52,32 @@ io.on('connection',function(socket){
            socket.player.y += y;
            io.emit('move', socket.player);
         });
+        socket.on('show star', function(x,y,vx,vy) {
+            io.emit('show star',x,y,vx,vy);
+
+        });
+        socket.on('update star', function(x, y, vx, vy) {
+           server.star.x = x;
+           server.star.y = y;
+           server.star.vx = vx;
+           server.star.vy = vy;
+           console.log('star position updated');
+        });
         socket.on('check if collided', function(x, y) {
             console.log('star.x:'+x+" player.x:"+socket.player.x);
             if ((x >= socket.player.x-20 && x <= socket.player.x+20) && (y >= socket.player.y-20 && y <= socket.player.y+20)) {
                 console.log('colllllliddeeeee!!!');
-                socket.emit('star catched');
+                io.emit('star catched',randomInt(100,400), randomInt(100,400), randomInt(20,220), randomInt(20,220));
+                socket.player.points += 20;
+                io.emit('update ui', getAllPlayers());
             }
 
-        });
-
-        io.emit('show star', server.star.x, server.star.y);
-
-        socket.on('add points', function() {
-            socket.player.points += 20;
-            io.emit('update ui', getAllPlayers());
         });
         socket.on('disconnect', function() {
             io.emit('remove', socket.player.id);
             console.log('Player disconnected: '+socket.player.nickname);
             delete socket.player;
-
+            server.lastPlayderID--;
         });
     });
 
@@ -76,7 +86,10 @@ function getAllPlayers(){
     var players = [];
     Object.keys(io.sockets.connected).forEach(function(socketID){
         var player = io.sockets.connected[socketID].player;
+
         if(player) players.push(player);
+        console.log('players amount: '+players.length);
+
     });
     return players;
 }

@@ -38,26 +38,26 @@ Game.update = function() {
     if (game.input.keyboard.isDown(Phaser.Keyboard.LEFT))
     {
         Client.movePlayerByKeyboard(-2, 0);
-        Client.checkIfCollided(image.world.x, image.world.y);
+
 
     }
     else if (game.input.keyboard.isDown(Phaser.Keyboard.RIGHT))
     {
         Client.movePlayerByKeyboard(2, 0);
-        //Game.getCoordinates(image, this);
-        Client.checkIfCollided(image.world.x, image.world.y);
 
     }
 
     if (game.input.keyboard.isDown(Phaser.Keyboard.UP))
     {
         Client.movePlayerByKeyboard(0, -2);
-        Client.checkIfCollided(image.world.x, image.world.y);
 
     }
     else if (game.input.keyboard.isDown(Phaser.Keyboard.DOWN))
     {
         Client.movePlayerByKeyboard(0, 2);
+
+    }
+    if (image) {
         Client.checkIfCollided(image.world.x, image.world.y);
 
     }
@@ -68,7 +68,10 @@ Game.getCoordinates = function(layer,pointer){
 };
 
 Game.addNewPlayer = function(id,nickname,x,y){
-	var sprite = game.add.sprite(x,y,'block');//.addChild(text);
+    if (Game.playerMap[id]) {
+        Game.playerMap[id].kill();
+    };
+    var sprite = game.add.sprite(x,y,'block');//.addChild(text);
 	var style = { font: "12px Arial", fill: "#ffffff" };
 	text = game.add.text(0, -14, nickname, style);
 	sprite.addChild(text);
@@ -81,13 +84,16 @@ Game.addNewPlayer = function(id,nickname,x,y){
 
     Game.playerMap[id] = sprite;
 };
-Game.addStar = function(x, y) {
+Game.addStar = function(x, y, vx, vy) {
+    if (image) {
+        image.kill();
+    }
     image = Game.add.sprite(x, y, 'flyer');
 
     Game.physics.enable(image, Phaser.Physics.ARCADE);
 
     //  This gets it moving
-    image.body.velocity.setTo(20,20);
+    image.body.velocity.setTo(vx,vy);
 
     //  This makes the game world bounce-able
     image.body.collideWorldBounds = true;
@@ -97,23 +103,7 @@ Game.addStar = function(x, y) {
     image.body.bounce.set(1);
     image.inputEnabled = true;
 }
-Game.resetStar = function() {
-    image.kill();
-    image = Game.add.sprite(randomInt(100,400),randomInt(100,400), 'flyer');
 
-    Game.physics.enable(image, Phaser.Physics.ARCADE);
-
-    //  This gets it moving
-    image.body.velocity.setTo(randomInt(10,40),randomInt(10,40));
-
-    //  This makes the game world bounce-able
-    image.body.collideWorldBounds = true;
-
-    //  This sets the image bounce energy for the horizontal
-    //  and vertical vectors. "1" is 100% energy return
-    image.body.bounce.set(1);
-    image.inputEnabled = true;
-};
 Game.moveSprite = function(x,y) {
 	image = game.add.sprite(x, y, 'flyer');
 };
