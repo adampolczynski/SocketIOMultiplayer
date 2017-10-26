@@ -64,7 +64,7 @@ io.on('connection',function(socket){
            console.log('star position updated');
         });
         socket.on('check if collided', function(x, y) {
-            console.log('star.x:'+x+" player.x:"+socket.player.x);
+            //console.log('star.x:'+x+" player.x:"+socket.player.x);
             if ((x >= socket.player.x-20 && x <= socket.player.x+20) && (y >= socket.player.y-20 && y <= socket.player.y+20)) {
                 console.log('colllllliddeeeee!!!');
                 io.emit('star catched',randomInt(100,400), randomInt(100,400), randomInt(20,220), randomInt(20,220));
