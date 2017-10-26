@@ -32,7 +32,7 @@ io.on('connection',function(socket){
             points: 0,
         };
 
-        if (server.lastPlayderID == 2) { // waiting until two players in room available
+        if (server.lastPlayderID >= 2) { // waiting until two players in room available
             //io.emit('show star', server.star.x, server.star.y, server.star.vx, server.star.vy);
             io.emit('show start',server.star.x, server.star.y, server.star.vx, server.star.vy);
         }
